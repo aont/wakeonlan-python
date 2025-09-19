@@ -1,24 +1,30 @@
-# Wake-on-LAN Script with YAML Configuration
+# Wake-on-LAN Script with YAML Configuration and Interface Support
 
-This Python script provides a simple way to power on computers remotely using **Wake-on-LAN (WOL)**. It allows you to store multiple computer configurations in a YAML file and wake them up by name.
+This Python script provides a convenient way to power on computers remotely using **Wake-on-LAN (WOL)**. Unlike simpler scripts, it supports network interface selection and can manage multiple machine configurations through a YAML file.
+
+---
 
 ## How It Works
 
-The script sends a **Magic Packet** to a target computer’s MAC address. This packet tells the computer’s network card to wake up, as long as Wake-on-LAN is enabled in its BIOS and network settings.
+The script generates and sends a **Magic Packet** to a target computer’s MAC address. If Wake-on-LAN is enabled in the computer’s BIOS/UEFI and network settings, the system will power on when the packet is received.
 
 The main steps are:
 
-1. Read a YAML configuration file (default: `~/.wol.yaml`).
+1. Load a YAML configuration file (default: `~/.wol.yaml`).
 2. Select a computer by name from the configuration.
-3. Send a Magic Packet with the computer’s MAC address, broadcast address, and port.
+3. Optionally, specify the network interface to send the packet from.
+4. Send a Magic Packet containing the computer’s MAC address, broadcast address, and port.
+
+---
 
 ## YAML Configuration
 
-Each computer is defined in the YAML file with three fields:
+Each computer entry in the YAML file can define the following fields:
 
-* `mac`: The MAC address of the network card.
-* `broadcast`: (Optional) Broadcast address, default is `255.255.255.255`.
-* `port`: (Optional) UDP port, default is `9`.
+* **`mac`** (required): The MAC address of the network card.
+* **`broadcast`** (optional): Broadcast address, defaults to `255.255.255.255`.
+* **`port`** (optional): UDP port, defaults to `9`.
+* **`interface`** (optional): The network interface name to use. If omitted, the script will attempt to send from all interfaces with an IPv4 address.
 
 Example `.wol.yaml`:
 
@@ -27,28 +33,55 @@ desktop:
   mac: "00:11:22:33:44:55"
   broadcast: "192.168.1.255"
   port: 9
+  interface: "eth0"
 
 server:
   mac: "66:77:88:99:AA:BB"
 ```
 
+---
+
 ## Usage
 
-* List available computers:
+### List Available Computers
 
-  ```bash
-  python3 wol.py -l
-  ```
-* Wake up a computer by name:
+Prints the configured machines and their settings:
 
-  ```bash
-  python3 wol.py desktop
-  ```
+```bash
+python3 wol.py -l
+```
 
-## Why Use It?
+### List Network Interfaces
+
+Shows the local interfaces and IPv4 addresses available for sending packets:
+
+```bash
+python3 wol.py --list-interfaces
+```
+
+### Wake Up a Computer
+
+Wakes up a machine by name (defined in the YAML file):
+
+```bash
+python3 wol.py desktop
+```
+
+### Specify a Custom Configuration File
+
+Use a non-default YAML file:
+
+```bash
+python3 wol.py -c ./my_wol.yaml server
+```
+
+---
+
+## Why Use This Script?
 
 This script is useful for:
 
-* Managing multiple computers from a single configuration file.
-* Avoiding the need to remember long MAC addresses.
-* Quickly waking up servers, desktops, or media PCs over the network.
+* **Centralized management**: Store multiple machine definitions in a single YAML file.
+* **Ease of use**: Wake machines by their friendly names instead of remembering MAC addresses.
+* **Flexibility**: Choose broadcast addresses, ports, and network interfaces when needed.
+* **Diagnostics**: Quickly list available interfaces and configuration entries.
