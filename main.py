@@ -53,7 +53,7 @@ def main():
     default_config = Path.home() / ".wol.yaml"
 
     parser = argparse.ArgumentParser(
-        description="Wake-on-LAN using YAML configuration (with interface support)"
+        description="Wake-on-LAN using YAML configuration or direct MAC input"
     )
     parser.add_argument("name", nargs="?", help="Target computer name defined in YAML")
     parser.add_argument(
@@ -68,12 +68,25 @@ def main():
         "--list-interfaces", action="store_true",
         help="List available network interfaces and exit"
     )
+
+    # ★ 単発指定オプション追加
+    parser.add_argument("--mac", help="Directly specify MAC address (e.g. 00:11:22:33:44:55)")
+    parser.add_argument("--broadcast", default="255.255.255.255", help="Broadcast address (default: 255.255.255.255)")
+    parser.add_argument("--port", type=int, default=9, help="UDP port (default: 9)")
+    parser.add_argument("--interface", help="Network interface to use")
+
     args = parser.parse_args()
 
     if args.list_interfaces:
         list_interfaces()
         sys.exit(0)
 
+    # ★ 単発モード
+    if args.mac:
+        send_magic_packet(args.mac, args.broadcast, args.port, args.interface)
+        sys.exit(0)
+
+    # YAML 設定モード
     config = load_config(args.config)
 
     if args.list:
