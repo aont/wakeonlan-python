@@ -1,51 +1,68 @@
-# Wake-on-LAN Script with YAML Configuration and Interface Support
+# Wake-on-LAN Script with YAML Configuration, Interface Control, and Flexible Options
 
-This Python script provides a convenient way to power on computers remotely using **Wake-on-LAN (WOL)**. Compared to simpler implementations, it supports **direct MAC input**, **network interface selection**, and management of **multiple machine configurations** through a YAML file.
+This Python script provides a **powerful and flexible tool** to wake computers remotely using **Wake-on-LAN (WOL)**. Unlike basic implementations, it supports:
+
+* **Direct MAC input** without configuration files
+* **Network interface selection** for precise control
+* **Multiple machine configurations** stored in YAML
+* **Diagnostic features** such as listing available interfaces and configured machines
+
+---
+
+## Features at a Glance
+
+* Send **Magic Packets** to wake systems by **name**, **MAC address**, or **YAML configuration**.
+* Specify **broadcast addresses**, **UDP ports**, and **network interfaces**.
+* Manage multiple hosts from a **single configuration file**.
+* Built-in tools to **list available network interfaces** and **configured machines**.
+* Support for **default settings** shared across all hosts in YAML.
 
 ---
 
 ## How It Works
 
-The script generates and sends a **Magic Packet** to a target computer’s MAC address. If Wake-on-LAN is enabled in the computer’s BIOS/UEFI and network settings, the system will power on when the packet is received.
+1. **YAML configuration loading** (default: `~/.wol.yaml`) with support for global defaults.
+2. **Target selection** by friendly name, MAC address, or command-line options.
+3. **Network interface binding** to ensure the packet is sent from the correct adapter.
+4. **Magic Packet generation and transmission**, repeated across available IPv4 interfaces if needed.
 
-The main steps are:
-
-1. Load a YAML configuration file (default: `~/.wol.yaml`).
-2. Select a computer by name from the configuration, or directly specify a MAC address.
-3. Optionally, specify the network interface, broadcast address, and port.
-4. Send a Magic Packet containing the computer’s MAC address.
+If the target computer has Wake-on-LAN enabled in its BIOS/UEFI and operating system settings, it will power on when it receives the packet.
 
 ---
 
 ## YAML Configuration
 
-Each computer entry in the YAML file can define the following fields:
+Each entry in the YAML file can include:
 
-* **`mac`** (required): The MAC address of the network card.
-* **`broadcast`** (optional): Broadcast address, defaults to `255.255.255.255`.
-* **`port`** (optional): UDP port, defaults to `9`.
-* **`interface`** (optional): The network interface name to use. If omitted, the script will attempt to send from all interfaces with an IPv4 address.
+* **`mac`** (required): Target machine’s MAC address.
+* **`broadcast`** (optional): Broadcast address (default: `255.255.255.255`).
+* **`port`** (optional): UDP port (default: `9`).
+* **`interface`** (optional): Network interface to use (default: all available IPv4 interfaces).
 
-Example `.wol.yaml`:
+### Example `.wol.yaml`
 
 ```yaml
-desktop:
-  mac: "00:11:22:33:44:55"
+__default__:
   broadcast: "192.168.1.255"
   port: 9
+
+desktop:
+  mac: "00:11:22:33:44:55"
   interface: "eth0"
 
 server:
   mac: "66:77:88:99:AA:BB"
 ```
 
+In this example, the `server` entry inherits default values for `broadcast` and `port`.
+
 ---
 
-## Usage
+## Usage Examples
 
 ### List Available Computers
 
-Prints the configured machines and their settings:
+Show all configured machines from the YAML file:
 
 ```bash
 python3 wol.py -l
@@ -53,37 +70,40 @@ python3 wol.py -l
 
 ### List Network Interfaces
 
-Shows the local interfaces and IPv4 addresses available for sending packets:
+Display all IPv4-enabled interfaces available for packet transmission:
 
 ```bash
 python3 wol.py --list-interfaces
 ```
 
-### Wake Up a Computer from YAML Config
+### Wake a Machine by Name (YAML Config)
 
-Wakes up a machine by name (defined in the YAML file):
+Wake a target defined in the YAML file:
 
 ```bash
 python3 wol.py desktop
 ```
 
-### Wake Up a Computer with Direct MAC Input
+### Wake a Machine by Direct MAC Input
 
-Send a Magic Packet without needing a YAML file:
+Wake a machine without using YAML:
 
 ```bash
 python3 wol.py --mac 00:11:22:33:44:55
 ```
 
-You can also customize broadcast, port, and interface:
+You can also specify custom options:
 
 ```bash
-python3 wol.py --mac 00:11:22:33:44:55 --broadcast 192.168.1.255 --port 7 --interface eth0
+python3 wol.py --mac 00:11:22:33:44:55 \
+               --broadcast 192.168.1.255 \
+               --port 7 \
+               --interface eth0
 ```
 
-### Specify a Custom Configuration File
+### Use a Custom YAML Config File
 
-Use a non-default YAML file:
+Provide a non-default YAML configuration file:
 
 ```bash
 python3 wol.py -c ./my_wol.yaml server
@@ -91,12 +111,16 @@ python3 wol.py -c ./my_wol.yaml server
 
 ---
 
-## Why Use This Script?
+## Why This Script?
 
-This script is useful for:
+This script is ideal for **home labs, servers, and remote work setups** where multiple machines need to be managed efficiently.
 
-* **Centralized management**: Store multiple machine definitions in a single YAML file.
-* **Direct flexibility**: Wake machines instantly by specifying a MAC address, even without config.
-* **Ease of use**: Wake machines by their friendly names instead of remembering MAC addresses.
-* **Flexibility**: Choose broadcast addresses, ports, and network interfaces when needed.
-* **Diagnostics**: Quickly list available interfaces and configuration entries.
+* **Centralized management**: Keep all machine definitions in a YAML file.
+* **Direct control**: Send packets quickly without a config file.
+* **Ease of use**: Refer to machines by human-readable names instead of raw MACs.
+* **Flexibility**: Choose specific interfaces, broadcasts, and ports.
+* **Diagnostics**: Instantly view available interfaces and configurations.
+
+---
+
+⚡ With this script, waking your machines becomes **simple, flexible, and reliable**—whether you’re managing a single desktop or a fleet of servers.
