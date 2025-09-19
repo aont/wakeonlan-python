@@ -4,19 +4,30 @@ import argparse
 import yaml
 import sys
 from pathlib import Path
+import psutil
 
 
-def send_magic_packet(mac_address, broadcast="255.255.255.255", port=9):
+def send_magic_packet(mac_address, broadcast="255.255.255.255", port=9, interface=None):
     mac_bytes = bytes.fromhex(mac_address.replace(":", "").replace("-", ""))
     if len(mac_bytes) != 6:
         raise ValueError(f"Invalid MAC address format: {mac_address}")
 
     packet = b"\xFF" * 6 + mac_bytes * 16
 
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        sock.sendto(packet, (broadcast, port))
-    print(f"Magic Packet sent to {mac_address} via {broadcast}:{port}")
+    for iface, addrs in psutil.net_if_addrs().items():
+        if interface and iface != interface:  # interface指定ありなら一致するもののみ
+            continue
+        for addr in addrs:
+            if addr.family == socket.AF_INET:
+                local_ip = addr.address
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                        sock.bind((local_ip, 0))  # 指定インターフェースのIPでbind
+                        sock.sendto(packet, (broadcast, port))
+                    print(f"Magic Packet sent to {mac_address} via {iface} ({local_ip}) -> {broadcast}:{port}")
+                except Exception as e:
+                    print(f"Failed to send from {local_ip} ({iface}): {e}")
 
 
 def load_config(path):
@@ -28,15 +39,23 @@ def load_config(path):
         sys.exit(1)
 
 
+def list_interfaces():
+    print("Available network interfaces:")
+    for iface, addrs in psutil.net_if_addrs().items():
+        ipv4_list = [addr.address for addr in addrs if addr.family == socket.AF_INET]
+        if ipv4_list:
+            print(f"  {iface}: {', '.join(ipv4_list)}")
+        else:
+            print(f"  {iface}: (no IPv4)")
+
+
 def main():
     default_config = Path.home() / ".wol.yaml"
 
     parser = argparse.ArgumentParser(
-        description="Wake-on-LAN using YAML configuration"
+        description="Wake-on-LAN using YAML configuration (with interface support)"
     )
-    parser.add_argument(
-        "name", nargs="?", help="Target computer name defined in YAML"
-    )
+    parser.add_argument("name", nargs="?", help="Target computer name defined in YAML")
     parser.add_argument(
         "-c", "--config", dest="config", default=str(default_config),
         help=f"YAML config file (default: {default_config})"
@@ -45,7 +64,15 @@ def main():
         "-l", "--list", action="store_true",
         help="List available computers from config"
     )
+    parser.add_argument(
+        "--list-interfaces", action="store_true",
+        help="List available network interfaces and exit"
+    )
     args = parser.parse_args()
+
+    if args.list_interfaces:
+        list_interfaces()
+        sys.exit(0)
 
     config = load_config(args.config)
 
@@ -55,7 +82,8 @@ def main():
             mac = comp.get("mac", "N/A")
             broadcast = comp.get("broadcast", "255.255.255.255")
             port = comp.get("port", 9)
-            print(f"- {name}: mac={mac}, broadcast={broadcast}, port={port}")
+            iface = comp.get("interface", "all")
+            print(f"- {name}: mac={mac}, broadcast={broadcast}, port={port}, interface={iface}")
         sys.exit(0)
 
     if not args.name:
@@ -71,12 +99,13 @@ def main():
     mac = comp.get("mac")
     broadcast = comp.get("broadcast", "255.255.255.255")
     port = comp.get("port", 9)
+    interface = comp.get("interface", None)
 
     if not mac:
         print(f"Computer '{args.name}' is missing 'mac' in config.")
         sys.exit(1)
 
-    send_magic_packet(mac, broadcast, port)
+    send_magic_packet(mac, broadcast, port, interface)
 
 
 if __name__ == "__main__":
