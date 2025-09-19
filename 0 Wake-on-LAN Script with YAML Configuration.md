@@ -1,6 +1,6 @@
 # Wake-on-LAN Script with YAML Configuration and Interface Support
 
-This Python script provides a convenient way to power on computers remotely using **Wake-on-LAN (WOL)**. Unlike simpler scripts, it supports network interface selection and can manage multiple machine configurations through a YAML file.
+This Python script provides a convenient way to power on computers remotely using **Wake-on-LAN (WOL)**. Compared to simpler implementations, it supports **direct MAC input**, **network interface selection**, and management of **multiple machine configurations** through a YAML file.
 
 ---
 
@@ -11,9 +11,9 @@ The script generates and sends a **Magic Packet** to a target computer’s MAC a
 The main steps are:
 
 1. Load a YAML configuration file (default: `~/.wol.yaml`).
-2. Select a computer by name from the configuration.
-3. Optionally, specify the network interface to send the packet from.
-4. Send a Magic Packet containing the computer’s MAC address, broadcast address, and port.
+2. Select a computer by name from the configuration, or directly specify a MAC address.
+3. Optionally, specify the network interface, broadcast address, and port.
+4. Send a Magic Packet containing the computer’s MAC address.
 
 ---
 
@@ -59,12 +59,26 @@ Shows the local interfaces and IPv4 addresses available for sending packets:
 python3 wol.py --list-interfaces
 ```
 
-### Wake Up a Computer
+### Wake Up a Computer from YAML Config
 
 Wakes up a machine by name (defined in the YAML file):
 
 ```bash
 python3 wol.py desktop
+```
+
+### Wake Up a Computer with Direct MAC Input
+
+Send a Magic Packet without needing a YAML file:
+
+```bash
+python3 wol.py --mac 00:11:22:33:44:55
+```
+
+You can also customize broadcast, port, and interface:
+
+```bash
+python3 wol.py --mac 00:11:22:33:44:55 --broadcast 192.168.1.255 --port 7 --interface eth0
 ```
 
 ### Specify a Custom Configuration File
@@ -82,6 +96,7 @@ python3 wol.py -c ./my_wol.yaml server
 This script is useful for:
 
 * **Centralized management**: Store multiple machine definitions in a single YAML file.
+* **Direct flexibility**: Wake machines instantly by specifying a MAC address, even without config.
 * **Ease of use**: Wake machines by their friendly names instead of remembering MAC addresses.
 * **Flexibility**: Choose broadcast addresses, ports, and network interfaces when needed.
 * **Diagnostics**: Quickly list available interfaces and configuration entries.
