@@ -42,7 +42,7 @@ Each entry in the YAML file can include:
 ### Example `.wol.yaml`
 
 ```yaml
-__default__:
+@default:
   broadcast: "192.168.1.255"
   port: 9
 

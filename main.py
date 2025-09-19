@@ -38,8 +38,7 @@ def load_config(path):
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        # __default__ があれば取り出す
-        defaults = data.pop("__default__", {})
+        defaults = data.pop("@default", {})
 
         # 各エントリを処理
         for name, comp in list(data.items()):
