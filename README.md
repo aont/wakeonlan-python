@@ -7,6 +7,16 @@ This Python script provides a **powerful and flexible tool** to wake computers r
 * **Multiple machine configurations** stored in YAML
 * **Diagnostic features** such as listing available interfaces and configured machines
 
+## Installation
+
+Install the latest version directly from GitHub using pip:
+
+```bash
+pip install git+https://github.com/<your-account>/wakeonlan-python.git
+```
+
+After installation the command-line entry point is available as `wakeonlan` (an alias `wakeonlan-python` is also installed).
+
 ---
 
 ## Features at a Glance
@@ -65,7 +75,7 @@ In this example, the `server` entry inherits default values for `broadcast` and 
 Show all configured machines from the YAML file:
 
 ```bash
-python3 wol.py -l
+wakeonlan -l
 ```
 
 ### List Network Interfaces
@@ -73,7 +83,7 @@ python3 wol.py -l
 Display all IPv4-enabled interfaces available for packet transmission:
 
 ```bash
-python3 wol.py --list-interfaces
+wakeonlan --list-interfaces
 ```
 
 ### Wake a Machine by Name (YAML Config)
@@ -81,7 +91,7 @@ python3 wol.py --list-interfaces
 Wake a target defined in the YAML file:
 
 ```bash
-python3 wol.py desktop
+wakeonlan desktop
 ```
 
 ### Wake a Machine by Direct MAC Input
@@ -89,13 +99,13 @@ python3 wol.py desktop
 Wake a machine without using YAML:
 
 ```bash
-python3 wol.py --mac 00:11:22:33:44:55
+wakeonlan --mac 00:11:22:33:44:55
 ```
 
 You can also specify custom options:
 
 ```bash
-python3 wol.py --mac 00:11:22:33:44:55 \
+wakeonlan --mac 00:11:22:33:44:55 \
                --broadcast 192.168.1.255 \
                --port 7 \
                --interface eth0
@@ -106,7 +116,7 @@ python3 wol.py --mac 00:11:22:33:44:55 \
 Provide a non-default YAML configuration file:
 
 ```bash
-python3 wol.py -c ./my_wol.yaml server
+wakeonlan -c ./my_wol.yaml server
 ```
 
 ---

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wakeonlan-python"
+version = "0.1.0"
+description = "Wake-on-LAN CLI with YAML configuration support"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "PyYAML>=6.0",
+    "psutil>=5.9",
+]
+
+[project.scripts]
+wakeonlan = "wakeonlan_python.cli:main"
+wakeonlan-python = "wakeonlan_python.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
