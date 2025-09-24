@@ -12,7 +12,7 @@ This Python script provides a **powerful and flexible tool** to wake computers r
 Install the latest version directly from GitHub using pip:
 
 ```bash
-pip install git+https://github.com/<your-account>/wakeonlan-python.git
+pip install git+https://github.com/aont/wakeonlan-python.git
 ```
 
 After installation the command-line entry point is available as `wakeonlan` (an alias `wakeonlan-python` is also installed).
